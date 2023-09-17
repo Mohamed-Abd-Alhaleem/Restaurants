@@ -1,6 +1,7 @@
 package com.application.restaurants
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,8 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -20,23 +23,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RestaurantsScreen() {
+    val viewModel: RestaurantsViewModel = viewModel()
+
     LazyColumn(
         contentPadding = PaddingValues(
             vertical = 8.dp,
             horizontal = 8.dp
         )
     ) {
-        items(dummyRestaurants) { restaurant ->
-            RestaurantItem(item = restaurant)
+        items(viewModel.state.value) { restaurant ->
+            RestaurantItem(item = restaurant) { id ->
+                viewModel.toggleFavorite(id)
+            }
         }
     }
 }
 
 @Composable
-fun RestaurantItem(item: Restaurant) {
+fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
+    val icon = if (item.isFavorite)
+        Icons.Filled.Favorite
+    else
+        Icons.Filled.FavoriteBorder
     Card(
         elevation = 4.dp,
         modifier = Modifier.padding(8.dp)
@@ -54,6 +66,12 @@ fun RestaurantItem(item: Restaurant) {
                 item.description,
                 Modifier.weight(0.85f)
             )
+            RestaurantIcon(
+                icon,
+                Modifier.weight(0.15f)
+            ) {
+                onClick(item.id)
+            }
         }
     }
 }
@@ -81,11 +99,16 @@ fun RestaurantDetails(item: String, description: String, modifier: Modifier) {
 @Composable
 fun RestaurantIcon(
     icon: ImageVector,
-    modifier: Modifier
+    modifier: Modifier,
+    onClick: () -> Unit = {}
 ) {
     Image(
         imageVector = icon,
         contentDescription = "Restaurant icon",
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .padding(8.dp)
+            .clickable {
+                onClick()
+            }
     )
 }
