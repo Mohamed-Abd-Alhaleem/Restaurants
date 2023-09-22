@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun RestaurantsScreen() {
+fun RestaurantsScreen(onItemClick: (id: Int) -> Unit) {
     val viewModel: RestaurantsViewModel = viewModel()
 
     LazyColumn(
@@ -36,22 +36,30 @@ fun RestaurantsScreen() {
         )
     ) {
         items(viewModel.state.value) { restaurant ->
-            RestaurantItem(item = restaurant) { id ->
-                viewModel.toggleFavorite(id)
+            RestaurantItem(item = restaurant, { id -> viewModel.toggleFavorite(id) }) { id ->
+                onItemClick(id)
             }
         }
     }
 }
 
 @Composable
-fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
+fun RestaurantItem(
+    item: Restaurant,
+    onFavoriteClick: (id: Int) -> Unit,
+    onItemClick: (id: Int) -> Unit
+) {
     val icon = if (item.isFavorite)
         Icons.Filled.Favorite
     else
         Icons.Filled.FavoriteBorder
     Card(
         elevation = 4.dp,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable {
+                onItemClick(item.id)
+            }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -70,16 +78,22 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
                 icon,
                 Modifier.weight(0.15f)
             ) {
-                onClick(item.id)
+                onFavoriteClick(item.id)
             }
         }
     }
 }
 
 @Composable
-fun RestaurantDetails(item: String, description: String, modifier: Modifier) {
+fun RestaurantDetails(
+    item: String,
+    description: String,
+    modifier: Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
     Column(
-        modifier = modifier
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment
     ) {
         Text(
             text = item,
