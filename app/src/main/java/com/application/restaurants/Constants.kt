@@ -8,5 +8,8 @@ object Constants {
     const val BASE_URL = "https://restaurants-145-default-rtdb.firebaseio.com/"
 
     const val RESTAURANTS = "restaurants"
+    const val URI_PATTERN = "www.restaurantsapp.details.com/{restaurant_id}"
+
+    const val DATABASE_NAME = "restaurants_database"
 
 }
