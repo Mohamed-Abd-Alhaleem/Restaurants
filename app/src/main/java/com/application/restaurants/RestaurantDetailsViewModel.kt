@@ -1,41 +1,39 @@
 package com.application.restaurants
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewmodel.CreationExtras
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class RestaurantDetailsViewModel(stateHandle: SavedStateHandle) : ViewModel() {
+class RestaurantDetailsViewModel(
+    private val stateHandle: SavedStateHandle,
+    private val repository: RestaurantsRepository,
+) : ViewModel() {
 
-    private var restInterface: RestaurantsApiService
-    val state = mutableStateOf<Restaurant?>(null)
-
+    private val _state = mutableStateOf<Restaurant?>(null)
+    val state: State<Restaurant?>
+        get() = _state
 
     init {
-        val retrofit: Retrofit = Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(Constants.BASE_URL)
-            .build()
-        restInterface = retrofit.create(RestaurantsApiService::class.java)
-
-        val id = stateHandle.get<Int>("restaurant_id")?: 0
+        val id = stateHandle.get<Int>("restaurant_id") ?: 0
 
         viewModelScope.launch {
-            val restaurant = getRemoteRestaurant(id)
-            state.value = restaurant
+            val restaurant = repository.getRemoteRestaurant(id)
+            _state.value = restaurant
         }
     }
 
-    private suspend fun getRemoteRestaurant(id: Int) : Restaurant {
-        return withContext(Dispatchers.IO) {
-            val responseMap = restInterface.getRestaurants(id)
-            return@withContext responseMap.values.first()
-        }
-    }
+}
 
+class DetailsViewModelFactory(
+    private val repository: RestaurantsRepository
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+        return RestaurantDetailsViewModel(extras.createSavedStateHandle(), repository) as T
+    }
 }

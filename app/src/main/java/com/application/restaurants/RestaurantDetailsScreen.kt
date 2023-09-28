@@ -14,7 +14,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RestaurantDetailsScreen() {
-    val viewModel: RestaurantDetailsViewModel = viewModel()
+    val repo = RestaurantsRepository()
+    val factory = DetailsViewModelFactory(repo)
+    val viewModel: RestaurantDetailsViewModel = viewModel(factory = factory)
     val item = viewModel.state.value
 
     if (item != null) {
