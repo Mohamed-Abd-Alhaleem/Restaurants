@@ -3,12 +3,12 @@ package com.application.restaurants.domain
 import com.application.restaurants.data.RestaurantsRepository
 import javax.inject.Inject
 
-class GetSortedRestaurantsUseCase @Inject constructor(
+class GetRemoteRestaurant @Inject constructor(
     private val repository: RestaurantsRepository
 ) {
 
-    suspend operator fun invoke(): List<Restaurant> {
-        return repository.getRestaurants().sortedBy { it.title }
+    suspend operator fun invoke(id: Int): Restaurant {
+        return repository.getRemoteRestaurant(id)
     }
 
 }

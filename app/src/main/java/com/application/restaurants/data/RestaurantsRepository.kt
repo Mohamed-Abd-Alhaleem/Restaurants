@@ -1,31 +1,24 @@
 package com.application.restaurants.data
 
-import com.application.restaurants.utils.Constants
 import com.application.restaurants.domain.Restaurant
 import com.application.restaurants.data.remote.RestaurantsApiService
-import com.application.restaurants.RestaurantsApplication
 import com.application.restaurants.data.local.LocalRestaurant
 import com.application.restaurants.data.local.PartialLocalRestaurant
-import com.application.restaurants.data.local.RestaurantsDb
+import com.application.restaurants.data.local.RestaurantsDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.net.ConnectException
 import java.net.UnknownHostException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RestaurantsRepository {
-
-    private var restInterface: RestaurantsApiService = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl(Constants.BASE_URL)
-        .build().create(RestaurantsApiService::class.java)
-
-
-    private var restaurantsDao =
-        RestaurantsDb.getDaoInstance(RestaurantsApplication.getAppContext())
+@Singleton
+class RestaurantsRepository @Inject constructor(
+    private val restInterface: RestaurantsApiService,
+    private val restaurantsDao: RestaurantsDao
+) {
 
     suspend fun toggleFavoriteRestaurant(id: Int, value: Boolean) =
         withContext(Dispatchers.IO) {
@@ -80,11 +73,23 @@ class RestaurantsRepository {
     }
 
 
-
     suspend fun getRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
             return@withContext restaurantsDao.getAll().map {
                 Restaurant(it.id, it.title, it.description, it.isFavorite)
+            }
+        }
+    }
+
+    suspend fun getRemoteRestaurant(id: Int): Restaurant {
+        return withContext(Dispatchers.IO) {
+            val responseMap = restInterface.getRestaurants(id)
+            return@withContext responseMap.values.first().let {
+                Restaurant(
+                    id = it.id,
+                    title = it.title,
+                    description = it.description,
+                )
             }
         }
     }
