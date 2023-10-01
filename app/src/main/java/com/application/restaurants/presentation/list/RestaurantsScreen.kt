@@ -1,4 +1,4 @@
-package com.application.restaurants
+package com.application.restaurants.presentation.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,14 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.application.restaurants.domain.Restaurant
 
 @Composable
-fun RestaurantsScreen(onItemClick: (id: Int) -> Unit) {
-    val repo = RestaurantsRepository()
-    val factory = ViewModelFactory(repo)
-    val viewModel: RestaurantsViewModel = viewModel(factory = factory)
-    val state = viewModel.state.value
+fun RestaurantsScreen(
+    state: RestaurantsScreenState,
+    onItemClick: (id: Int) -> Unit,
+    onFavoriteClick: (id: Int, oldValue: Boolean) -> Unit
+) {
 
     Box(
         contentAlignment = Alignment.Center,
@@ -47,7 +47,7 @@ fun RestaurantsScreen(onItemClick: (id: Int) -> Unit) {
         ) {
             items(state.restaurants) { restaurant ->
                 RestaurantItem(item = restaurant, { id, oldValue ->
-                    viewModel.toggleFavorite(id, oldValue)
+                    onFavoriteClick(id, oldValue)
                 }) { id ->
                     onItemClick(id)
                 }

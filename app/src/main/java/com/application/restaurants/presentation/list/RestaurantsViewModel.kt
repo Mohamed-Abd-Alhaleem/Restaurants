@@ -1,14 +1,18 @@
-package com.application.restaurants
+package com.application.restaurants.presentation.list
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.application.restaurants.domain.GetInitialRestaurantsUseCase
+import com.application.restaurants.domain.ToggleRestaurantUseCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
-class RestaurantsViewModel(private val repository: RestaurantsRepository) : ViewModel() {
+class RestaurantsViewModel : ViewModel() {
+
+    private val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase()
+    private val toggleRestaurantUseCase = ToggleRestaurantUseCase()
 
     private val _state = mutableStateOf(
         RestaurantsScreenState(
@@ -34,7 +38,7 @@ class RestaurantsViewModel(private val repository: RestaurantsRepository) : View
 
     fun toggleFavorite(id: Int, oldValue: Boolean) {
         viewModelScope.launch(errorHandler) {
-            val updatedRestaurants = repository.toggleFavoriteRestaurant(id, oldValue)
+            val updatedRestaurants = toggleRestaurantUseCase(id, oldValue)
             _state.value = _state.value.copy(
                 restaurants = updatedRestaurants
             )
@@ -43,7 +47,7 @@ class RestaurantsViewModel(private val repository: RestaurantsRepository) : View
 
     private fun getRestaurants() {
         viewModelScope.launch(errorHandler) {
-            val restaurants = repository.getAllRestaurants()
+            val restaurants = getInitialRestaurantsUseCase()
             _state.value = _state.value.copy(
                 restaurants = restaurants,
                 isLoading = false
@@ -51,13 +55,4 @@ class RestaurantsViewModel(private val repository: RestaurantsRepository) : View
         }
     }
 
-}
-
-class ViewModelFactory(private val repository: RestaurantsRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RestaurantsViewModel::class.java))
-            return RestaurantsViewModel(repository) as T
-        else
-            throw IllegalArgumentException("View Model Class Not Found")
-    }
 }

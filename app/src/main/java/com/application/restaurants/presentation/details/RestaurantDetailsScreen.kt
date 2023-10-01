@@ -1,4 +1,4 @@
-package com.application.restaurants
+package com.application.restaurants.presentation.details
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.application.restaurants.domain.Restaurant
+import com.application.restaurants.presentation.list.RestaurantDetails
+import com.application.restaurants.presentation.list.RestaurantIcon
 
 @Composable
-fun RestaurantDetailsScreen() {
-    val repo = RestaurantsRepository()
-    val factory = DetailsViewModelFactory(repo)
-    val viewModel: RestaurantDetailsViewModel = viewModel(factory = factory)
-    val item = viewModel.state.value
+fun RestaurantDetailsScreen(
+    item: Restaurant?
+) {
 
     if (item != null) {
         Column(

@@ -1,10 +1,10 @@
-package com.application.restaurants
+package com.application.restaurants.data.local
 
 import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
+import androidx.room.Entity
 
-data class PartialRestaurant(
+@Entity()
+class PartialLocalRestaurant(
 
     @ColumnInfo(name = "r_id")
     val id: Int,
